@@ -17,16 +17,52 @@
       height: 50px;
       border: none;
    }
-   .speack {
+   .board {
       display: block;
+      margin: 15px auto;
+   }
+   .speack, .time {
+      display: inline-block;
+      padding: 0 15px;
+      
       line-height: 50px;
       background: blanchedalmond;
-      width: 25%;
-      margin: 15px auto;
-      text-transform: uppercase;
+      /*width: 25%;*/
+      /*margin: 15px auto;*/
       font-size: 15px;
    }
+   .speack {
+      text-transform: uppercase;
+   }
+   .result-time {
+      margin: 15px 0;
+   }
+   .result-time .res {
+      /*text-align: left;
+      display: inline-block;
+      background: #dcdcdc;
+      width: 25%;*/
+   }
+   
 </style>
+
+</head>
+<body>
+   <div class="content">
+      1-е до: <input class="min" style="width:50px" type="number" min=20 value=99 step=50>
+      2-е до: <input class="max" style="width:50px" type="number" value=99 min=20 step=50>
+      <div class="tell"></div>
+      <div class="text"></div>
+      <div class="board">
+         <div onclick='tell()' style="cursor:pointer;" class="speack">ещё раз</div> 
+         <div class="time "></div></div>
+      <button></button>
+      <button></button>
+      <button></button>
+      <button></button>
+      <div class="result-time">
+      </div>
+   </div>
 <script>
    function rand(min,max){
       var rand = min - 0.5 + Math.random() * (max - min + 1)
@@ -35,105 +71,92 @@
    }
    function shuffle(array) {
       var currentIndex = array.length, temporaryValue, randomIndex;
+      // While there remain elements to shuffle...
+      while (0 !== currentIndex) {
 
-// While there remain elements to shuffle...
-while (0 !== currentIndex) {
+      // Pick a remaining element...
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex -= 1;
 
-// Pick a remaining element...
-randomIndex = Math.floor(Math.random() * currentIndex);
-currentIndex -= 1;
-
-// And swap it with the current element.
-temporaryValue = array[currentIndex];
-array[currentIndex] = array[randomIndex];
-array[randomIndex] = temporaryValue;
-}
-
-return array;
-}
-window.onload = function(){
-   function run(){
-      var text = document.querySelector(".text");
-      var buttonSelector = document.querySelectorAll("button");
-      var min = document.querySelector(".min");
-      var max = document.querySelector(".max");
-      min.onchange = ()=>run();
-      max.onchange = ()=>run();
-      minNum=min.value;
-      maxNum=max.value;
-      num1 = rand(minNum,maxNum);
-      num2 = rand(minNum,maxNum);
-      operand = rand(1,2);
-      if(operand == 1){
-         res = num1+num2;
-         prodOperand="+"
-         prodOperandTell="плюс"
+      // And swap it with the current element.
+      temporaryValue = array[currentIndex];
+      array[currentIndex] = array[randomIndex];
+      array[randomIndex] = temporaryValue;
       }
-      if(operand == 2){
-         res = num1-num2;
-         prodOperand="-"
-         prodOperandTell="минус"
-      }
-      var bt = [rand(1,100)+res,res-rand(1,100),res,10+res]
-      bt=shuffle(bt);
 
-      for (var i = 0; i < bt.length; i++) {
-         buttonSelector[i].style.backgroundColor="";
-         buttonSelector[i].innerHTML = bt[i];
-         buttonSelector[i].value=bt[i];
-         var l;
-         if(bt[i]==res){
-            l = async function(){
-               this.style.backgroundColor="green";
-               await setTimeout(startRun(), 100000);
-            }
-         }else {
-            l = function(){
-               this.style.backgroundColor="red"
-            }
+      return array;
+   }
+   window.onload = function(){
+      function run(){
+         var text = document.querySelector(".text");
+         var buttonSelector = document.querySelectorAll("button");
+         var time = 0, selectTime=document.querySelector(".time");
+         var timerId = setInterval(function(){
+            selectTime.innerHTML=time+++" сек";
+         },1000);
+         var min = document.querySelector(".min");
+         var max = document.querySelector(".max");
+         min.onchange = ()=>run();
+         max.onchange = ()=>run();
+         minNum=min.value;
+         maxNum=max.value;
+         num1 = rand(1,minNum);
+         num2 = rand(0,maxNum);
+         operand = rand(1,2);
+         if(operand == 1){
+            res = num1+num2;
+            prodOperand="+"
+            prodOperandTell="плюс"
          }
-         buttonSelector[i].onclick = l;
+         if(operand == 2){
+            res = num1-num2;
+            prodOperand="-"
+            prodOperandTell="минус"
+         }
+         var bt = [rand(1,20)+res,res-rand(1,20),res,10+res]
+         bt=shuffle(bt);
 
-      }
-//  text.innerHTML=num1+prodOperand+num2; // insert html text
-tell();
-document.querySelector(".speack").onclick=function (){
+         for (var i = 0; i < bt.length; i++) {
+            buttonSelector[i].style.backgroundColor="";
+            buttonSelector[i].innerHTML = bt[i];
+            buttonSelector[i].value=bt[i];
+            var l;
+            if(bt[i]==res){
+               l = function(){
+                  updateTime(time);
+                  clearInterval(timerId);
+                  startRun();
+                  
+               }
+            }else {
+               l = function(){
+                  this.style.backgroundColor="red"
+               }
+            }
+            buttonSelector[i].onclick = l;
+
+         }
+   //  text.innerHTML=num1+prodOperand+num2; // insert html text
    tell();
-}
-function tell(){
-   document.querySelector(".tell").innerHTML='<iframe style="display:none" src="https://tts.voicetech.yandex.net/generate?text='+num1+prodOperandTell+num2+'&format=mp3&lang=ru-RU&speaker=jane&emotion=good&speed=0.9&key=abfbe0a3-819a-4a81-806a-1d9abfe007f6" width="100%" height="100%" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>'
-}
-}
-function startRun(){
-   run();
-}
+   document.querySelector(".speack").onclick=function (){
+      tell();
+   }
 
-run();
-}
+   function updateTime(res){
+      var selectTableRes = document.querySelector(".result-time");
+      var htmlRes = selectTableRes.innerHTML;
+      selectTableRes.innerHTML = '<div class="res">'+res+' сек</div>'+htmlRes;
+   }
+   function tell(){
+      // document.querySelector(".tell").innerHTML='<iframe style="display:none" src="https://tts.voicetech.yandex.net/generate?text='+num1+prodOperandTell+num2+'&format=mp3&lang=ru-RU&speaker=jane&emotion=good&speed=0.9&key=abfbe0a3-819a-4a81-806a-1d9abfe007f6" width="100%" height="100%" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>'
+   }
+   }
+   function startRun(){
+      run();
+   }
+
+   run();
+   }
 </script>
-</head>
-<body>
-   <div class="content">
-      Мин: <input class="min" style="width:50px" type="number" min=20 value=99 step=50>
-      Макс: <input class="max" style="width:50px" type="number" value=999 min=20 step=50>
-      <div class="tell"></div>
-      <div class="text"></div>
-      <div onclick='tell()' style="cursor:pointer;" class="speack">ещё раз прослушать</div>
-      <button></button>
-      <button></button>
-      <button></button>
-      <button></button>
-   </div>
-   <div class="content">
-      Мин: <input class="min" style="width:50px" type="number" min=20 value=99 step=50>
-      Макс: <input class="max" style="width:50px" type="number" value=999 min=20 step=50>
-      <div class="tell"></div>
-      <div class="text"></div>
-      <div onclick='tell()' style="cursor:pointer;" class="speack">ещё раз прослушать</div>
-      <button></button>
-      <button></button>
-      <button></button>
-      <button></button>
-   </div>
 </body>
 </html>
